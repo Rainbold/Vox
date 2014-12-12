@@ -31,10 +31,23 @@
 
 \newpage
 
-\section{Encodage de codes convolutifs}
+\section{Analyse spectrale et préliminaire à l'analyse temps-fréquence}
+
+	\subsection{Étude théorique}
 	
-	\subsection{Analyse spectrale et préliminaire à l'analyse temps-fréquence}
+		La FFT (\textit{Fast Fourier Transform}) est un algorithme de calcul de la transformée de Fourier discrète. Pour appliquer ce dernier, le signal que l'on cherche à étudie doit être constitué de $2^N$ points, avec $N \in \mathbb{N}$.
+		Si ler signal analysé ne possède pas un nombre de points suffisant, on peut compléter ce dernier par des zéros, ce procédé est nommé zero-padding. Le nombre de point étant augmenté dans le domaine temporel, on gagne en précision dans le domaine fréquentiel.\\
+		\\
+		Matlab nous fourni de nombreux outils implémentant cette algorithme. On peut ainsi s'aider des fonctions suivantes :
+			\begin{description}
+				\item[fft] Permet de calculer une transformée de Fourier discrète avec l'algorithme de la transformée de Fourier rapide ;
+				\item[fft2] Permet de calculer une transformée de Fourier 2D discrète avec l'algorithme de la transformée de Fourier rapide ;
+				\item[fftshift] Permet de recentrer la transformée de Fourier par rapport à la composante de fréquence nulle.\\
+			\end{description}
+		\\
+		\\
+		$S(k) = A\cdot sin(2\pi \frac{f_0}{f_{ech}})$
+		
 	
-		\subsubsection{Étude théorique}
 
 \end{document}
