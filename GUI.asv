@@ -22,7 +22,7 @@ function varargout = GUI(varargin)
 
 % Edit the above text to modify the response to help GUI
 
-% Last Modified by GUIDE v2.5 10-Dec-2014 15:27:53
+% Last Modified by GUIDE v2.5 12-Dec-2014 16:35:29
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -127,11 +127,15 @@ function open_signal_ClickedCallback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 [filename, filepath] = uigetfile('*.mat');
+set(handles.panel_gen, 'Visible', 'off');
+set(handles.panel_signal, 'Visible', 'on');
 if ~isequal(filename, 0)
     signal_struct = load([filepath filename]);
-   
-    raw = signal_struct.ecg;
-    fech = signal_struct.Fs;
+    
+    nom = strsplit(filename, '.');
+    
+    raw = signal_struct.(nom{1});
+    fech = 8000;
     len = length(raw);
     
     handles.signal_raw = raw;
@@ -140,7 +144,7 @@ if ~isequal(filename, 0)
     handles.offset = 0;
     handles.N_window = min(fech * 5, len);
     
-    handles.signal = signal_struct.ecg((1+handles.offset):(handles.offset+handles.N_window));
+    handles.signal = raw((1+handles.offset):(handles.offset+handles.N_window));
 
     guidata(hObject, handles);
     
@@ -241,8 +245,8 @@ cla(handles.axes_signal, 'reset');
 
 handles.offset = 0;
 set(handles.slider_offset, 'Value', [ 0 ]);
-
-set(handles.edit_temps, 'Value', [ time ]);
+time
+set(handles.edit_temps, 'String', time);
 handles.N_window = min(handles.signal_fech * time, length(handles.signal_raw));
 handles.signal = handles.signal_raw((1+handles.offset):(handles.offset+handles.N_window));
 
@@ -396,13 +400,88 @@ handles.signal_fech = fe;
 
 guidata(hObject, handles);
 
-
-min([d 10*min([i1 i2])])
-reset_axes_signal(hObject, handles, min([d 10*min([i1 i2])]));
+reset_axes_signal(hObject, handles, min([d 50*1/(max([f1 f2]))]));
 
 set(handles.panel_signal,'Title', 'Visualisation temporelle du signal - Signal sinusoïdal');
 
 guidata(hObject, handles);
 set(handles.panel_gen, 'Visible', 'off');
 set(handles.panel_signal, 'Visible', 'on');
+end
+
+
+% --- Executes on button press in button_ar_gen.
+function button_ar_gen_Callback(hObject, eventdata, handles)
+% hObject    handle to button_ar_gen (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+end
+
+
+function edit_ar_Callback(hObject, eventdata, handles)
+% hObject    handle to edit_ar (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit_ar as text
+%        str2double(get(hObject,'String')) returns contents of edit_ar as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit_ar_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit_ar (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function edit_ar_fech_Callback(hObject, eventdata, handles)
+% hObject    handle to edit_ar_fech (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit_ar_fech as text
+%        str2double(get(hObject,'String')) returns contents of edit_ar_fech as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit_ar_fech_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit_ar_fech (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function edit_ar_duree_Callback(hObject, eventdata, handles)
+% hObject    handle to edit_ar_duree (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit_ar_duree as text
+%        str2double(get(hObject,'String')) returns contents of edit_ar_duree as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit_ar_duree_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit_ar_duree (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
 end

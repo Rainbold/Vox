@@ -1,0 +1,9 @@
+function [ signal ] = gen_AR( AR, duree, fech )
+
+ordre = length(AR);
+
+bruit = randn(1, fech * duree);
+    
+
+end
+
