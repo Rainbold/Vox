@@ -22,7 +22,7 @@ function varargout = GUI(varargin)
 
 % Edit the above text to modify the response to help GUI
 
-% Last Modified by GUIDE v2.5 12-Dec-2014 14:59:57
+% Last Modified by GUIDE v2.5 10-Dec-2014 15:27:53
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -241,8 +241,8 @@ cla(handles.axes_signal, 'reset');
 
 handles.offset = 0;
 set(handles.slider_offset, 'Value', [ 0 ]);
-time
-set(handles.edit_temps, 'String', time);
+
+set(handles.edit_temps, 'Value', [ time ]);
 handles.N_window = min(handles.signal_fech * time, length(handles.signal_raw));
 handles.signal = handles.signal_raw((1+handles.offset):(handles.offset+handles.N_window));
 
@@ -396,7 +396,9 @@ handles.signal_fech = fe;
 
 guidata(hObject, handles);
 
-reset_axes_signal(hObject, handles, min([d 50*1/(max([f1 f2]))]));
+
+min([d 10*min([i1 i2])])
+reset_axes_signal(hObject, handles, min([d 10*min([i1 i2])]));
 
 set(handles.panel_signal,'Title', 'Visualisation temporelle du signal - Signal sinusoïdal');
 
