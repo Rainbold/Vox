@@ -201,6 +201,8 @@ if(handles.N_window == 0)
 elseif(handles.N_window > length(handles.signal_raw))
     handles.N_window = length(handles.signal_raw);
     set(handles.edit_temps, 'String', sprintf('%s', handles.N_window));
+    set(handles.slider_offset, 'Value', 0);
+    handles.offset = 0;
 end
 if(~isempty(handles.signal_raw ~= 0))
     t = handles.offset+handles.N_window;
@@ -210,7 +212,9 @@ if(~isempty(handles.signal_raw ~= 0))
     handles.signal = handles.signal_raw((1+handles.offset):(handles.offset+handles.N_window));
 end
 
-set(handles.slider_offset, 'Value', handles.offset / (length(handles.signal_raw) - handles.N_window));
+if((length(handles.signal_raw) - handles.N_window) ~= 0)
+    set(handles.slider_offset, 'Value', handles.offset / (length(handles.signal_raw) - handles.N_window));
+end
 
 cla(handles.axes_signal, 'reset');
 guidata(hObject, handles);
@@ -244,7 +248,7 @@ function reset_axes_signal(hObject, handles, time)
 cla(handles.axes_signal, 'reset');
 
 handles.offset = 0;
-set(handles.slider_offset, 'Value', [ 0 ]);
+set(handles.slider_offset, 'Value', 0);
 
 set(handles.edit_temps, 'String', time);
 handles.N_window = min(handles.signal_fech * time, length(handles.signal_raw));
@@ -417,12 +421,12 @@ function button_ar_gen_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 d = str2double(get(handles.edit_ar_duree,'String'));
 fe = str2double(get(handles.edit_ar_fe,'String'));
-str = get(handles.edit_f1,'String');
+str = get(handles.edit_ar,'String');
 sp = strsplit(str);
 coeff = str2double(sp);
 
 signal_raw = AR_gen(coeff, d, fe);
-    
+
 handles.signal_raw = signal_raw;
 handles.signal_fech = fe;    
 
