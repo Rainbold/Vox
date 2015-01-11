@@ -15,7 +15,11 @@
 \usepackage{subcaption}
 \usepackage{array}
 \usepackage{stmaryrd}
-
+    
+		\DeclareFontFamily{U}{wncy}{}
+    \DeclareFontShape{U}{wncy}{m}{n}{<->wncyr10}{}
+    \DeclareSymbolFont{mcy}{U}{wncy}{m}{n}
+    \DeclareMathSymbol{\Sh}{\mathord}{mcy}{"58} 
 
 
 \title{\textbf{TS225 - Projet Signal}}
@@ -31,22 +35,39 @@
 
 \newpage
 
+\section{Introduction}
+
 \section{Analyse spectrale et préliminaire à l'analyse temps-fréquence}
 
 	\subsection{Étude théorique}
 	
 		La FFT (\textit{Fast Fourier Transform}) est un algorithme de calcul de la transformée de Fourier discrète. Pour appliquer ce dernier, le signal que l'on cherche à étudie doit être constitué de $2^N$ points, avec $N \in \mathbb{N}$.
-		Si ler signal analysé ne possède pas un nombre de points suffisant, on peut compléter ce dernier par des zéros, ce procédé est nommé zero-padding. Le nombre de point étant augmenté dans le domaine temporel, on gagne en précision dans le domaine fréquentiel.\\
+		Si le signal analysé ne possède pas un nombre de points suffisant, on peut compléter ce dernier par des zéros, ce procédé est nommé zero-padding. Le nombre de point étant augmenté dans le domaine temporel, on gagne en précision dans le domaine fréquentiel.\\
 		\\
 		Matlab nous fourni de nombreux outils implémentant cette algorithme. On peut ainsi s'aider des fonctions suivantes :
 			\begin{description}
-				\item[fft] Permet de calculer une transformée de Fourier discrète avec l'algorithme de la transformée de Fourier rapide ;
-				\item[fft2] Permet de calculer une transformée de Fourier 2D discrète avec l'algorithme de la transformée de Fourier rapide ;
-				\item[fftshift] Permet de recentrer la transformée de Fourier par rapport à la composante de fréquence nulle.\\
+				\item[fft] qui permet de calculer une transformée de Fourier discrète avec l'algorithme de la transformée de Fourier rapide ;
+				\item[fft2] qui permet de calculer une transformée de Fourier 2D discrète avec l'algorithme de la transformée de Fourier rapide ;
+				\item[fftshift] qui permet de recentrer la transformée de Fourier par rapport à la composante de fréquence nulle.\\
 			\end{description}
 		\\
 		\\
-		$S(k) = A\cdot sin(2\pi \frac{f_0}{f_{ech}})$
+		Lorsqu'on étudie des signaux, on ne peut le faire sur des temps inifinis. Ainsi, afin d'avoir un support temporel qui soit fini, on fenêtre les signaux étudiés. Nous allons, ici, analyser spectralement l'impact d'un tel fenêtrage sur un signal sinusoïdal, que l'on échantillonnera par la suite, représenté par la fonction suivante : $s(x) = sin(2\pi f_0 t)$.\\
+		On fenêtre ce signal rectangulairement par une porte de taille N, on obtient alors : 
+		\[
+			f(x) = sin(2\pi f_0 t) \cdot \Pi_{N}(t)
+		\]
+		Puis on échantillonne ce dernier à une fréquence $f_{ech}$ : 
+		\[
+			\tilde{f}(x) = sin(2\pi f_0 t) \cdot \Pi_{N}(t) \cdot \Sh_\frac{1}{f_{ech}}(t)
+		\]
+		\\
+		On calcule alors la transformée de Fourier de ce signal :
+		\begin{align}
+			\tilde{F}(\nu) &= \frac{1}{2j}[\delta(\nu+f_0) - \delta(\nu-f_0)] \otimes N\cdot sinc(N\nu) \otimes f_{ech} \Sh_{f_{ech}}(\nu) \\
+			&= 
+		\end{align}
+		
 		
 	
 
