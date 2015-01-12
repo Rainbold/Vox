@@ -1,6 +1,6 @@
 \documentclass[11pt]{article}
 
-\usepackage[left=0.75in, right=0.75in, top=0.75in, bottom=0.75in]{geometry}
+\usepackage[left=1in, right=1in, top=1in, bottom=1in]{geometry}
 \usepackage{layout}
 \usepackage{ucs}
 \usepackage[french]{babel}
@@ -15,6 +15,12 @@
 \usepackage{subcaption}
 \usepackage{array}
 \usepackage{stmaryrd}
+\usepackage{fourier}
+\usepackage[T1]{fontenc}
+\usepackage{enumitem}
+\usepackage[frenchb]{babel}
+
+\frenchbsetup{StandardItemLabels}
     
 		\DeclareFontFamily{U}{wncy}{}
     \DeclareFontShape{U}{wncy}{m}{n}{<->wncyr10}{}
@@ -26,6 +32,13 @@
 \author{Maxime PETERLIN - Gabriel VERMEULEN\\\\{ENSEIRB-MATMECA, Bordeaux}}
 \date{14 novembre 2014}
 
+\newenvironment{inddesc}{%
+\begin{description}%
+\addtolength{\itemindent}{1cm}%
+}
+{%
+\end{description}%
+}
 
 \begin{document}
 
@@ -35,24 +48,28 @@
 
 \newpage
 
-\section{Introduction}
+\section*{Introduction}
+\addcontentsline{toc}{section}{Introduction}
+	
+	Ce projet de traitement du signal a pour but l'analyse spectrale de signaux de paroles, et ce à l'aide de plusieurs méthodes. Pour se faire, nous étudierons théoriquement les différentes approches abordées par ce projet, en l'occurence la FFT, le modèle autorégressif et la méthode de Capon, ainsi qu'une implémentation sur \textsc{MATLAB} pour chaque méthode.
 
-\section{Analyse spectrale et préliminaire à l'analyse temps-fréquence}
+\section{Méthode par FFT}
 
 	\subsection{Étude théorique}
 	
 		La FFT (\textit{Fast Fourier Transform}) est un algorithme de calcul de la transformée de Fourier discrète. Pour appliquer ce dernier, le signal que l'on cherche à étudie doit être constitué de $2^N$ points, avec $N \in \mathbb{N}$.
-		Si le signal analysé ne possède pas un nombre de points suffisant, on peut compléter ce dernier par des zéros, ce procédé est nommé zero-padding. Le nombre de point étant augmenté dans le domaine temporel, on gagne en précision dans le domaine fréquentiel.\\
-		\\
+		Si le signal analysé ne possède pas un nombre de points suffisant, on peut compléter ce dernier par des zéros, ce procédé est nommé zero-padding. Le nombre de point étant augmenté dans le domaine temporel, on gagne en précision dans le domaine fréquentiel.\newline
+		
 		Matlab nous fourni de nombreux outils implémentant cette algorithme. On peut ainsi s'aider des fonctions suivantes :
-			\begin{description}
+			\begin{inddesc}
 				\item[fft] qui permet de calculer une transformée de Fourier discrète avec l'algorithme de la transformée de Fourier rapide ;
 				\item[fft2] qui permet de calculer une transformée de Fourier 2D discrète avec l'algorithme de la transformée de Fourier rapide ;
 				\item[fftshift] qui permet de recentrer la transformée de Fourier par rapport à la composante de fréquence nulle.\\
-			\end{description}
-		\\
-		\\
+			\end{inddesc}
+		\newline
+		
 		Lorsqu'on étudie des signaux, on ne peut le faire sur des temps inifinis. Ainsi, afin d'avoir un support temporel qui soit fini, on fenêtre les signaux étudiés. Nous allons, ici, analyser spectralement l'impact d'un tel fenêtrage sur un signal sinusoïdal, que l'on échantillonnera par la suite, représenté par la fonction suivante : $s(x) = sin(2\pi f_0 t)$.\\
+		\\
 		On fenêtre ce signal rectangulairement par une porte de taille N, on obtient alors : 
 		\[
 			f(x) = sin(2\pi f_0 t) \cdot \Pi_{N}(t)
@@ -64,11 +81,295 @@
 		\\
 		On calcule alors la transformée de Fourier de ce signal :
 		\begin{align}
-			\tilde{F}(\nu) &= \frac{1}{2j}[\delta(\nu+f_0) - \delta(\nu-f_0)] \otimes N\cdot sinc(N\nu) \otimes f_{ech} \Sh_{f_{ech}}(\nu) \\
-			&= 
+			\tilde{F}(\nu) &= \frac{1}{2j}[\delta(\nu+f_0) - \delta(\nu-f_0)] \otimes N\cdot sinc(N\nu) \otimes f_{ech} \Sh_{f_{ech}}(\nu)
 		\end{align}
-		
-		
+		Finalement, on a :\newline
+		\[
+			\boxed{\tilde{F}(\nu) &= N \cdot f_{ech} \sum \limits^{+\infty}_{k=-\infty} sinc(N \cdot k \cdot f_{ech} + N \cdot f_{0}) - sinc(N \cdot k \cdot f_{ech} - N \cdot f_{0})}
+		\]
+
+	\subsection{Implémentation sur Matlab}
 	
+		\subsubsection{Signaux générés}
+			Le signal que nous avons généré est une somme de sinusoïdes : $s(t) = sin(2\pif_0 t) + sin(2\pif_1 t)$ avec $f_0 = 30$ Hz et $f_1 = 200$ Hz.
+			\begin{figure}[h]
+				\centering
+				\includegraphics[scale=0.35]{img/fft_analyse_gen.jpg}
+				\caption{Signal temporel et DSP}
+			\end{figure}
+		
+		\subsubsection{Signaux réels}
+			Nous avons ensuite appliqué la FFT à un signal \textit{réel}, qui est ici un signal voisé d'une durée de 50ms.
+			\begin{figure}[h]
+				\centering
+				\includegraphics[scale=0.35]{img/fft_analyse_reel.jpg}
+				\caption{Signal temporel et DSP}
+			\end{figure}
+
+\section{Approche par méthode AR}
+
+	\subsection{Étude théorique}
+	
+		Le but de cette partie est l'étude des processus auto-regressif AR tout en mettant en place une technique d'estimation de leurs paramètres en supposant connue leur fonction d'autocorrélation. Le modèle AR permet d'analyser spectralement un signal dans la mesure où les paramètres AR vont nous permettre de connaître les pôles du filtre qu'il représente et donc les fréquences de résonnances : il peut ainsi être vu comme un filtre RII.  \\
+		Pour se faire, nous allons nous baser sur un processus AR supposé stationnaire au sens large et à temps discret défini de la manière suivante :
+		 
+		\[
+			x(k) = -\sum \limits^{p}_{i=1} a_i \cdot x(k-i) + u(k)
+		\]
+		\\
+		avec $u(k)$ un bruit blanc gaussien centré de variance $\sigma_u^2$, $p$ l'ordre du processus et $\{a_i\}_{i=1,\ ...,\ p}$ les paramètres AR.\newline
+		
+		On veut un moyen d'estimer les coefficients AR à partir de la fonction d'autocorrélation, pour se faire nous allons établir une relation entre p+1 valeur consécutives de la fonction d'autocorrélation de $x(k)$.\\
+		\begin{align}
+			r_{xx}(\tau) &= E[x(k)x(k-\tau)]\\
+			&= E[(-\sum \limits^{p}_{i=1} a_i \cdot x(k -i) + u(k - i))x(k-\tau)]\\
+			&= -\sum \limits^{p}_{i=1} a_i E[x(k -i)x(k-\tau)] + E[x(k-\tau)u(k - i)])\\
+			r_{xx}(\tau) &= -\sum \limits^{p}_{i=1} a_i E[x(k -i)x(k-\tau)] + E[x(k-\tau)]E[u(k - i)])
+		\end{align}
+		A présent, nous allons calculer la moyenne du processuss AR en supposant que $1+\sum \limits^{p}_{i=1} a_i \neq 0$\\
+		\begin{align}
+			E[x(k)] &= -\sum \limits^{p}_{i=1} E[a_i \cdot x(k-i)]\\
+			&= -\sum \limits^{p}_{i=1} a_i E[x(k-i)]\\
+			&= -\sum \limits^{p}_{i=1} a_i E[x(k)]\\
+			E[x(k)]&(1+\sum \limits^{p}_{i=1} a_i) = 0
+		\end{align}
+		On sait, par hypothèse, que $1+\sum \limits^{p}_{i=1} a_i \neq 0$, donc $\boxed{E[x(k)] = 0}$\\
+		\\
+		Ainsi, 
+		\[
+			r_{xx}(\tau) &= -\sum \limits^{p}_{i=1} a_i E[x(k -i)x(k-\tau)]\\
+		\]
+		\[
+			\boxed{r_{xx}(\tau) &= -\sum \limits^{p}_{i=1} a_i r_{xx}(\tau-j)}
+		\]
+		\newline
+		
+		On peut maintenant en déduire une relation entre les paramètres AR, défini par $[a_1,\ \ldots,\ a_p]^T$ et la matrice d'autocorrélation du processus.\\
+		On a alors :
+		\[
+			\left(
+				\begin{array}{c}
+					r_{xx}(1)\\
+					\vdots\\
+					r_{xx}(p)
+				\end{array}
+			\right)
+			=
+			-
+			\left(
+				\begin{array}{ccc}
+					r_xx(0) & \cdots & r_xx(1-p)\\
+					\vdots & \ddots & \vdots \\
+					r_xx(p-1) & \cdots & r_xx(0)\\
+				\end{array}
+			\right)
+			\left(
+				\begin{array}{c}
+					a_1\\
+					\vdots\\
+					a_p
+				\end{array}
+			\right)
+		\]
+		\\
+		
+	Maintenant que la relation est établie, nous allons étudier certains processus d'ordre 1 et 2 et analyser leur spectre de puissance en fonction des valeurs des paramètres AR, ainsi que leur domaine de stabilité.\\
+	\newpage
+	\begin{itemize}
+		\item \textbf{Processus AR d'ordre 1}\\
+			\begin{itemize}
+				\item \textbf{Domaine de stabilité}\\
+				On a un processus de la forme suivante :
+				\[
+					x(k) = -a_1x(k-1) + u(k)
+				\]
+				Ainsi, la fonction de transfert sera :
+				\[
+					H(z) = \frac{1}{1+a_1z^{-1}}
+				\]
+				On a 
+				\[
+					z^{-1}(a_1 + z) = 0 \Longleftrightarrow z = -a_1
+				\]
+				Il faut donc que $\boxed{|a_1| < 1}$\newline
+				\newline
+				On obtient alors le domaine de stabilité suivant :
+						\begin{figure}[h]
+							\centering
+							\includegraphics[scale=0.35]{img/ar_zone_stab_ordre_1.png}
+							\caption{Domaine de stabilité du processus AR d'ordre 1}
+						\end{figure}
+	
+			%\newpage
+				\item \textbf{Domaine de stabilité du processus d'ordre 1}\\
+				\begin{figure}[h]
+					 \begin{minipage}[c]{.46\linewidth}
+							\includegraphics[scale=0.25]{img/ar_sp_ordre_1_0_5.jpg}
+							\caption{Spectre de puissance pour $a_1 = 0.5$}
+					 \end{minipage} \hfill
+					 \begin{minipage}[c]{.46\linewidth}
+							\includegraphics[scale=0.20]{img/ar_sp_ordre_1_1_5.jpg}
+							\caption{Spectre de puissance de $a_1 = 1.5$}
+					 \end{minipage}
+				\end{figure}
+				\\
+				On a bien une divergence pour $a_1 = 1.5$, lorsqu'on compare les valeurs du spectre de puissance par rapport à celles de $a_1 = 0.5$.\\
+				\\
+			\end{itemize}\newline
+			\newline
+		\item \textbf{Processus AR d'ordre 2}\newline
+			\begin{itemize}
+				\item \textbf{Domaine de stabilité}\\
+					On a un processus de la forme suivante :
+				\[
+					x(k) = -a_2x(k-2) -a_1x(k-1) + u(k)
+				\]
+				Ainsi, la fonction de transfert sera :
+				\[
+					H(z) = \frac{1}{1+a_1z^{-1}+a_2z^{-2}}
+				\]
+				On a :
+				\[
+					z^{-2}(a_2 + za_1 + z^2) = 0 \Longrightarrow \Delta = \sqrt{a_1^2-4a_2}
+				\]
+				\begin{itemize}
+					\item \textbf{Cas réel :}
+						\[
+							z_+ = \frac{-a_1 + \sqrt{\Delta}}{2}, z_- = \frac{-a_1 - \sqrt{\Delta}}{2}
+						\]
+						\[
+						 |z_-|^2 < 1 \Longleftrightarrow |2 \cdot z_-|^2 = |a_1^2-a_1^2-4a_2^2| = 4a_2^2 < 4 \Longleftrightarrow \boxed{|a_2| < 1}
+						\]
+					\item \textbf{Cas complexe :}
+						\[
+							z_+ = \frac{-a_1 + i\sqrt{\Delta}}{2}, z_- = \frac{-a_1 - i\sqrt{\Delta}}{2}\\
+						\]
+						\[
+							\begin{cases}
+								|z_+| < 1\\
+								|z_-| < 1
+							\end{cases} \Longleftrightarrow
+							\begin{cases}
+								-2 < a_1 + \sqrt{a_1^2-4a_2} < 2\\
+								-2 < a_1 - \sqrt{a_1^2-4a_2} < 2
+							\end{cases} \Longleftrightarrow
+							\begin{cases}
+								-2 < a_1  < 2\\
+								-2 +a_1 < \sqrt{a_1^2-4a_2} < 2 + a_1
+							\end{cases}
+						\]
+						\[
+							\Longleftrightarrow \begin{cases}
+								-2 < a_1  < 2\\
+								-2 +a_1 < (-2 +a_1)^2 < a_1^2-4a_2 < (2 + a_1)^2
+							\end{cases}
+							\Longleftrightarrow \begin{cases}
+								-2 < a_1  < 2\\
+								-1 -a_1 < a_2 < -1 + a_1
+							\end{cases}
+						\]
+				\end{itemize}
+				Ce qui nous donne $\boxed{|a_2| < 1}$ et $\boxed{|a_2+1|<a_1}$\\
+				\newline
+				%\newpage
+				On obtient alors le domaine de stabilité suivant :
+						\begin{figure}[!h]
+							\centering
+							\includegraphics[scale=0.35]{img/ar_zone_stab_ordre_2.png}
+							\caption{Domaine de stabilité du processus AR d'ordre 2}
+						\end{figure}
+				\newline
+				\item \textbf{Allure du spectre de puissance}\\
+			\end{itemize}
+	\end{itemize}
+
+	\subsection{Implémentation sur Matlab}
+	
+		\subsubsection{Signaux générés}
+			Le but, à présent, est de retrouver l'allure de la DSP à partir de l'estimation des coefficients AR. On commence par générer un processus AR d'ordre 4. On a 4 pôles conjugués 2 à 2.
+			
+			\begin{figure}[h]
+				\centering
+				\includegraphics[scale=0.35]{img/ar_analyse_poles.jpg}
+				\caption{Pôles générés et estimés}
+			\end{figure}
+			
+			On remarque que les pôles estimés sont proches de ceux qui ont été générés.
+			
+		\subsubsection{Signaux réels}
+		On étudie toujours le signal voisé de la première partie.
+		
+			\begin{figure}[h]
+				\centering
+				\includegraphics[scale=0.35]{img/ar_analyse_reel.jpg}
+				\caption{Signal temporel et DSP}
+			\end{figure}
+			
+			L'allure de la DSP estimée n'est pas aussi proche de celle calculée grâce à la FFT. 
+	
+
+\section{Approche par méthode de Capon}
+
+La méthode de Capon repose sur l'analyse de la puissance associée à chaque fréquence d'un signal donné à l'aide d'un filtre RIF ayant 1 comme gain à la fréquence qui nous intéresse, ce qui permet de détecter si la composante recherchée est présente ou non dans le signal.\newline
+\newline
+
+Soit ${h(k)}_{k=0,\ldots,N-1}$ la réponse impulsionnelle du filtre causal, $x(n)$ le signal d'entrée, $y(n)$ le signal de sortie. On sait que $y(n) = \sum \limits_{k=0}^{N-1}h(k)x(n-k)$, donc :
+\[
+	y(n) = \underline{h} \underline{x}(n) = [h(0)\ \ldots\ h(n-1)]
+	\left[ 
+	\begin{array}[c]
+xx(n)\\
+		\vdots\\
+		x(n-N-1)
+	\end{array} \right]
+\]
+\newline
+On en déduit que :
+\begin{align}
+	E[y^2(n)] &= E[y(n)y(n)^T] = E[\underline{h}\underline{x}(n)^T\underline{h}^T\underline{x}(n)]
+\end{align}
+Ainsi, la puissance instantanée du signal de sortie est :
+\[
+	\boxed{E[y^2(n)] = \underline{h}R_x\underline{h}^T}
+\]
+
+Afin de trouver la contrainte sur le filtre dans le cadre de l'approche de Capon, nous commençons, tout d'abord, par calculer la transformée de Fourier de la réponse impulsionnelle du filtre RIF.
+\begin{align}
+	H(f) &= \sum \limit_{k=0}^{N-1}h(k)e^{-j2k\pi\frac{f}{f_{ech}}}\\
+	&= \underline{h} \underline{a}(f)
+\end{align}\newline
+
+Ainsi, la contrainte en une fréquence d'intérêt donnée $f_i$ est $\boxed{\underline{h} \underline{a}(f_i) = 1}$
+
+\newpage
+	\subsection{Implémentation sur Matlab}
+	
+		\subsubsection{Signaux générés}
+			L'étude se fait avec le signal généré dans la première partie.\\
+			
+			\begin{figure}[!h]
+				\centering
+				\includegraphics[scale=0.35]{img/capon_analyse_gen.jpg}
+				\caption{Signal temporel et DSP}
+			\end{figure}
+			On remarque que la DSP calculée est en accord avec le signal généré.\\
+		
+		\subsubsection{Signaux réels}
+			\begin{figure}[h]
+				\centering
+				\includegraphics[scale=0.35]{img/capon_analyse_reel.jpg}
+				\caption{Signal temporel et DSP}
+			\end{figure}
+			La DSP est cohérente avec celle trouvée grâce à la FFT, on retrouve bien les 3 pics de fréquences attendus.\\
+
+
+\newpage
+\section*{Conclusion}
+\addcontentsline{toc}{section}{Conclusion}
+
+Nous avons vu, grâce à ce projet, différentes méthodes permettant d'analyser spectralement un signal. La FFT qui est un algorithme facile à mettre en oeuvre et efficace d'un point de vu complexité, reste sujet à des problèmes de résolution survenants lorsque le nombre de points le composant est insuffisant ou encore à des valeurs indésirables fréquentiellement lorsqu'on fenêtre le signal. \\
+Pour le modèle AR, le problème a été le choix de l'ordre, il faut trouver la bonne valeur permettant d'avoir une estimation correcte, mais lorsqu'on l'a, les résultats obtenus sont plus que satisfaisant.\\
+Enfin, pour la méthode de Capon, le résultat que l'on obtient est lui aussi tout à fait satisfaisant, cependant, vu que l'on doit balayer toutes les fréquences, le temps de calcul est relativement plus long par rapport aux autres méthodes.
+
 
 \end{document}

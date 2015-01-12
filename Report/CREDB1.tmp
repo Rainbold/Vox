@@ -1,0 +1,222 @@
+\documentclass[11pt]{article}
+
+\usepackage[left=0.75in, right=0.75in, top=0.75in, bottom=0.75in]{geometry}
+\usepackage{layout}
+\usepackage{ucs}
+\usepackage[french]{babel}
+\usepackage[latin1]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{titlesec}
+\usepackage{graphicx}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{dsfont}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{array}
+\usepackage{stmaryrd}
+\usepackage{fourier}
+\usepackage[T1]{fontenc}
+    
+		\DeclareFontFamily{U}{wncy}{}
+    \DeclareFontShape{U}{wncy}{m}{n}{<->wncyr10}{}
+    \DeclareSymbolFont{mcy}{U}{wncy}{m}{n}
+    \DeclareMathSymbol{\Sh}{\mathord}{mcy}{"58} 
+
+
+\title{\textbf{TS225 - Projet Signal}}
+\author{Maxime PETERLIN - Gabriel VERMEULEN\\\\{ENSEIRB-MATMECA, Bordeaux}}
+\date{14 novembre 2014}
+
+
+\begin{document}
+
+\maketitle
+			
+\tableofcontents
+
+\newpage
+
+\section{Introduction}
+
+	
+
+\section{Analyse spectrale et préliminaire à l'analyse temps-fréquence}
+
+	\subsection{Étude théorique}
+	
+		La FFT (\textit{Fast Fourier Transform}) est un algorithme de calcul de la transformée de Fourier discrète. Pour appliquer ce dernier, le signal que l'on cherche à étudie doit être constitué de $2^N$ points, avec $N \in \mathbb{N}$.
+		Si le signal analysé ne possède pas un nombre de points suffisant, on peut compléter ce dernier par des zéros, ce procédé est nommé zero-padding. Le nombre de point étant augmenté dans le domaine temporel, on gagne en précision dans le domaine fréquentiel.\\
+		\\
+		Matlab nous fourni de nombreux outils implémentant cette algorithme. On peut ainsi s'aider des fonctions suivantes :
+			\begin{description}
+				\item[fft] qui permet de calculer une transformée de Fourier discrète avec l'algorithme de la transformée de Fourier rapide ;
+				\item[fft2] qui permet de calculer une transformée de Fourier 2D discrète avec l'algorithme de la transformée de Fourier rapide ;
+				\item[fftshift] qui permet de recentrer la transformée de Fourier par rapport à la composante de fréquence nulle.\\
+			\end{description}
+		\\
+		\\
+		Lorsqu'on étudie des signaux, on ne peut le faire sur des temps inifinis. Ainsi, afin d'avoir un support temporel qui soit fini, on fenêtre les signaux étudiés. Nous allons, ici, analyser spectralement l'impact d'un tel fenêtrage sur un signal sinusoïdal, que l'on échantillonnera par la suite, représenté par la fonction suivante : $s(x) = sin(2\pi f_0 t)$.\\
+		On fenêtre ce signal rectangulairement par une porte de taille N, on obtient alors : 
+		\[
+			f(x) = sin(2\pi f_0 t) \cdot \Pi_{N}(t)
+		\]
+		Puis on échantillonne ce dernier à une fréquence $f_{ech}$ : 
+		\[
+			\tilde{f}(x) = sin(2\pi f_0 t) \cdot \Pi_{N}(t) \cdot \Sh_\frac{1}{f_{ech}}(t)
+		\]
+		\\
+		On calcule alors la transformée de Fourier de ce signal :
+		\begin{align}
+			\tilde{F}(\nu) &= \frac{1}{2j}[\delta(\nu+f_0) - \delta(\nu-f_0)] \otimes N\cdot sinc(N\nu) \otimes f_{ech} \Sh_{f_{ech}}(\nu) \\
+			&= N \cdot f_{ech} \sum \limits^{+\infty}_{k=-\infty} sinc(N \cdot f_{ech} + N \cdot f_{0}) - sinc(N \cdot f_{ech} - N \cdot f_{0})
+		\end{align}
+		
+
+	\subsection{Approche par méthode AR}
+	
+		Le but de cette partie est l'étude des processus auto-regressif AR, tout mettant en place une technique d'estimation de leurs paramètres en supposant connue leur fonction d'autocorrélation.\\
+		Pour se faire, nous allons nous baser sur un processus AR supposé stationnaire au sens large et à temps discret défini de la manière suivante :
+		 
+		\[
+			x(k) = -\sum \limits^{p}_{i=1} a_i \cdot x(k-i) + u(k)
+		\]
+		
+		avec $u(k)$ un bruit blanc gaussien centré de variance $\sigma_u^2$, $p$ l'ordre du processus et $\{a_i\}_{i=1,\ ...,\ p}$ les paramètres AR.\\
+		\\
+		On veut un moyen d'estimer les coefficients AR à partir de la fonction d'autocorrélation, pour se faire nous allons établir une relation entre p+1 valeur consécutives de la fonction d'autocorrélation de $x(k)$.\\
+		\begin{align}
+			r_{xx}(\tau) &= E[x(k)x(k-\tau)]\\
+			&= E[(-\sum \limits^{p}_{i=1} a_i \cdot x(k -i) + u(k - i))x(k-\tau)]\\
+			&= -\sum \limits^{p}_{i=1} a_i E[x(k -i)x(k-\tau)] + E[x(k-\tau)u(k - i)])\\
+			&= -\sum \limits^{p}_{i=1} a_i E[x(k -i)x(k-\tau)] + E[x(k-\tau)]E[u(k - i)])
+		\end{align}
+		
+		A présent, nous allons calculer la moyenne du processuss AR en supposant que $1+\sum \limits^{p}_{i=1} a_i \neq 0$\\
+		\begin{align}
+			E[x(k)] &= -\sum \limits^{p}_{i=1} E[a_i \cdot x(k-i)]\\
+			&= -\sum \limits^{p}_{i=1} a_i E[x(k-i)]\\
+			&= -\sum \limits^{p}_{i=1} a_i E[x(k)]\\
+			E[x(k)]&(1+\sum \limits^{p}_{i=1} a_i) = 0
+		\end{align}
+		On sait, par hypothèse, que $1+\sum \limits^{p}_{i=1} a_i \neq 0$, donc $E[x(k)] = 0$.\\
+		\\
+		Ainsi, 
+		\begin{align}
+			r_{xx}(\tau) &= -\sum \limits^{p}_{i=1} a_i E[x(k -i)x(k-\tau)]\\
+			&= -\sum \limits^{p}_{i=1} a_i r_{xx}(\tau-j)
+		\end{align}
+		
+		On peut maintenant en déduire une relation entre les paramètres AR, défini par $[a_1,\ \ldots,\ a_p]^T$ et la matrice d'autocorrélation du processus.\\
+		On a alors :
+		\[
+			\left(
+				\begin{array}{c}
+					r_{xx}(1)\\
+					\vdots\\
+					r_{xx}(p)
+				\end{array}
+			\right)
+			=
+			-
+			\left(
+				\begin{array}{ccc}
+					r_xx(0) & \cdots & r_xx(1-p)\\
+					\vdots & \ddots & \vdots \\
+					r_xx(p-1) & \cdots & r_xx(0)\\
+				\end{array}
+			\right)
+			\left(
+				\begin{array}{c}
+					a_1\\
+					\vdots\\
+					a_p
+				\end{array}
+			\right)
+		\]
+		\\
+		
+	Maintenant que la relation est établie, nous allons étudier certains processus d'ordre 1 et 2 et analyser leur spectre de puissance en fonction des valeurs des paramètres AR, ainsi que leur domaine de stabilité.\\
+	\begin{itemize}
+	
+		\item \textbf{Processus AR d'ordre 1}
+			\begin{itemize}
+				\item \textbf{Domaine de stabilité}\\
+				On a un processus de la forme suivante :
+				\[
+					x(k) = -a_1x(k-1) + u(k)
+				\]
+				Ainsi, la fonction de transfert sera :
+				\[
+					H(z) = \frac{1}{1+a_1z^{-1}}
+				\]
+				On a 
+				\[
+					z^{-1}(a_1 + z) = 0 \Longleftrightarrow z = -a_1
+				\]
+				Il faut donc que $|a_1| < 1$.
+				On obtient alors le domaine de stabilité suivant :
+						\begin{figure}[h]
+							\centering
+							\includegraphics[scale=0.40]{img/ar_zone_stab_ordre_1.png}
+							\caption{Domaine de stabilité du processus AR d'ordre 1}
+						\end{figure}
+	
+				\item \textbf{Domaine de stabilité du processus d'ordre 1}\\
+				\begin{figure}[!h]
+					 \begin{minipage}[c]{.46\linewidth}
+							\includegraphics[scale=0.25]{img/ar_sp_ordre_1_0_5.jpg}
+							\caption{Spectre de puissance pour $a_1 = 0.5$}
+					 \end{minipage} \hfill
+					 \begin{minipage}[c]{.46\linewidth}
+							\includegraphics[scale=0.20]{img/ar_sp_ordre_1_1_5.jpg}
+							\caption{Spectre de puissance de $a_1 = 1.5$}
+					 \end{minipage}
+				\end{figure}
+				\\
+				On a bien une divergence pour $a_1 = 1.5$, lorsqu'on compare les valeurs du spectre de puissance par rapport à celles de $a_1 = 0.5$.\\
+				\\
+			\end{itemize}
+			\newpage
+		\item \textbf{Processus AR d'ordre 2}
+			\begin{itemize}
+				\item \textbf{Domaine de stabilité}\\
+					On a un processus de la forme suivante :
+				\[
+					x(k) = -a_2x(k-2) -a_1x(k-1) + u(k)
+				\]
+				Ainsi, la fonction de transfert sera :
+				\[
+					H(z) = \frac{1}{1+a_1z^{-1}+a_2z^{-2}}
+				\]
+				On a :
+				\[
+					z^{-2}(a_2 + za_1 + z^2) = 0 \Longrightarrow \Delta = a_1^2-4a_2
+				\]
+				\begin{itemize}
+					\item \textbf{Cas réel :}
+						\[
+							z_+ = \frac{-a_1 + \sqrt{\Delta}}{2}, z_- = \frac{-a_1 - \sqrt{\Delta}}{2}
+						\]
+					\item \textbf{Cas complexe :}
+						\[
+							z_+ = \frac{-a_1 + i\sqrt{\Delta}}{2}, z_- = \frac{-a_1 - i\sqrt{\Delta}}{2}
+						\]
+				\end{itemize}
+				Il faut $|z_-|<1$ et $|z_+|<1$.\\
+				Dans les deux cas, on a
+					\[
+						|2 \cdot z_-|^2 = |a_1^2-a_1^2-4a_2^2| = 4a_2^2 < 4 \Longleftrightarrow -1 < a_2 < 1
+					\]
+				On en déduit alors :
+					\[
+						|2 \cdot z_+|^2 = |a_1^2+a_1^2-4a_2^2| = |2a_1^2-4a_2^2| < 4 \Longleftrightarrow -2+2a_2^2 < a_1^2 < 2+2_a^2
+					\]
+				
+				
+				\item \textbf{Allure du spectre de puissance}\\
+			\end{itemize}
+	\end{itemize}
+	
+
+\end{document}
