@@ -30,7 +30,7 @@
 
 \title{\textbf{TS225 - Projet Signal}}
 \author{Maxime PETERLIN - Gabriel VERMEULEN\\\\{ENSEIRB-MATMECA, Bordeaux}}
-\date{14 novembre 2014}
+\date{12 janvier 2015}
 
 \newenvironment{inddesc}{%
 \begin{description}%
@@ -240,6 +240,7 @@
 						\[
 						 |z_-|^2 < 1 \Longleftrightarrow |2 \cdot z_-|^2 = |a_1^2-a_1^2-4a_2^2| = 4a_2^2 < 4 \Longleftrightarrow \boxed{|a_2| < 1}
 						\]
+
 					\item \textbf{Cas complexe :}
 						\[
 							z_+ = \frac{-a_1 + i\sqrt{\Delta}}{2}, z_- = \frac{-a_1 - i\sqrt{\Delta}}{2}\\
@@ -269,7 +270,7 @@
 							\end{cases}
 						\]
 				\end{itemize}
-				Ce qui nous donne $\boxed{|a_2| < 1}$ et $\boxed{|a_2+1|<a_1}$\\
+				Ce qui nous donne $\boxed{|a_1| < 2}$ et $\boxed{|a_2+1|<a_1}$\\
 				\newline
 				%\newpage
 				On obtient alors le domaine de stabilité suivant :
@@ -367,8 +368,10 @@ Ainsi, la contrainte en une fréquence d'intérêt donnée $f_i$ est $\boxed{\underl
 \section*{Conclusion}
 \addcontentsline{toc}{section}{Conclusion}
 
-Nous avons vu, grâce à ce projet, différentes méthodes permettant d'analyser spectralement un signal. La FFT qui est un algorithme facile à mettre en oeuvre et efficace d'un point de vu complexité, reste sujet à des problèmes de résolution survenants lorsque le nombre de points le composant est insuffisant ou encore à des valeurs indésirables fréquentiellement lorsqu'on fenêtre le signal. \\
-Pour le modèle AR, le problème a été le choix de l'ordre, il faut trouver la bonne valeur permettant d'avoir une estimation correcte, mais lorsqu'on l'a, les résultats obtenus sont plus que satisfaisant.\\
+Nous avons vu, grâce à ce projet, différentes méthodes permettant d'analyser spectralement un signal. La FFT qui est un algorithme facile à mettre en oeuvre et efficace d'un point de vu complexité, reste sujet à des problèmes de résolution survenants lorsque le nombre de points le composant est insuffisant ou encore à des valeurs indésirables fréquentiellement lorsqu'on fenêtre le signal. \newline
+
+Pour le modèle AR, le problème a été le choix de l'ordre, il faut trouver la bonne valeur permettant d'avoir une estimation correcte, mais lorsqu'on l'a, les résultats obtenus sont plus que satisfaisant.\newline
+
 Enfin, pour la méthode de Capon, le résultat que l'on obtient est lui aussi tout à fait satisfaisant, cependant, vu que l'on doit balayer toutes les fréquences, le temps de calcul est relativement plus long par rapport aux autres méthodes.
 
 
