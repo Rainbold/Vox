@@ -91,7 +91,7 @@
 	\subsection{Implémentation sur Matlab}
 	
 		\subsubsection{Signaux générés}
-			Le signal que nous avons généré est une somme de sinusoïdes : $s(t) = sin(2\pif_0 t) + sin(2\pif_1 t)$ avec $f_0 = 30$ Hz et $f_1 = 200$ Hz.
+			Le signal que nous avons généré est une somme de sinusoïdes : $s(t) = sin(2\pif_0 t) + 0.5sin(2\pif_1 t)$ avec $f_0 = 30$ Hz et $f_1 = 200$ Hz.
 			\begin{figure}[h]
 				\centering
 				\includegraphics[scale=0.35]{img/fft_analyse_gen.jpg}
@@ -281,6 +281,11 @@
 						\end{figure}
 				\newline
 				\item \textbf{Allure du spectre de puissance}\\
+						\begin{figure}[!h]
+							\centering
+							\includegraphics[scale=0.35]{img/AR_ordre2.png}
+							\caption{Spectre de puissance pour $a_1 = 0.5$ et $a_2 = 0.5$}
+						\end{figure}
 			\end{itemize}
 	\end{itemize}
 
@@ -296,11 +301,11 @@
 			\end{figure}
 			
 			On remarque que les pôles estimés sont proches de ceux qui ont été générés.
-			
+			\newpage
 		\subsubsection{Signaux réels}
 		On étudie toujours le signal voisé de la première partie.
 		
-			\begin{figure}[h]
+			\begin{figure}[!h]
 				\centering
 				\includegraphics[scale=0.35]{img/ar_analyse_reel.jpg}
 				\caption{Signal temporel et DSP}
@@ -342,7 +347,6 @@ Afin de trouver la contrainte sur le filtre dans le cadre de l'approche de Capon
 
 Ainsi, la contrainte en une fréquence d'intérêt donnée $f_i$ est $\boxed{\underline{h} \underline{a}(f_i) = 1}$
 
-\newpage
 	\subsection{Implémentation sur Matlab}
 	
 		\subsubsection{Signaux générés}
@@ -363,8 +367,38 @@ Ainsi, la contrainte en une fréquence d'intérêt donnée $f_i$ est $\boxed{\underl
 			\end{figure}
 			La DSP est cohérente avec celle trouvée grâce à la FFT, on retrouve bien les 3 pics de fréquences attendus.\\
 
+\section{Analyse temps-fréquence}
 
-\newpage
+	Le problème avec un signal réel est la diversité des fréquences sur tout le long du signal. On ne peut en faire une analyse globale, car ils ne sont pas, en général, stationnaire au sens large. C'est pourquoi, afin d'analyser des signaux réels, on segmente temporellement ces derniers, pour se ramener à des trames stationnaires que l'on peut ensuite analyser fréquentiellement.\newline
+	
+		\begin{figure}[h]
+			\centering
+			\includegraphics[scale=0.35]{img/spectrogramme.png}
+			\caption{Spectrogramme du signal de parole présenté dans la première partie}
+		\end{figure}
+			
+	Cette figure a été générée avec la fonction $spectrogram$	de \textsc{MATLAB}. Ensuite, nous avons essayé d'implémenter notre propre fonction permettant de faire du temps réel, c'est-à-dire un traitement de données arrivant en continue. Par conséquent, l'échelle des amplitudes est locale et l'amplitude maximale est calculée pour chaque fenêtre (la couleur de chaque maximum est la même pour chaque segment), elle n'est pas globale comme pour la fonction $spectrogram$.\newline
+	
+		\begin{figure}[h]
+			\centering
+			\includegraphics[scale=0.35]{img/GUI_Spectrogramme.png}
+			\caption{Spectrogramme du signal de parole présenté dans la première partie}
+		\end{figure}
+			
+	Sur ce spectrogramme, on remarque dans les intervalles sans signaux de voix, la présence d'un bruit. A l'inverse lorsque qu'il y a un signal de voix, le bruit est masqué et les caractéristiques fréquentielles, telles que les harmoniques, du signal sont affichés.
+
+
+\section{Bilan de l'organisation}
+
+	\begin{itemize}
+		\item \textbf{Première séance :} Théorie et pratique de la partie FFT.
+		\item \textbf{Deuxième séance :} Théorie et pratique de la partie AR.
+		\item \textbf{Entre la deuxième et troisième séance (~3h) :} Mise en place de la GUI.
+		\item \textbf{Troisième séance :} Théorie et pratique de la partie Capon.
+		\item \textbf{Quatrième séance :} Ajout de fonctionnalités à la GUI et spectrogramme.
+		\item \textbf{Après la dernière séance (~10h) :} Réglages des derniers bugs et écriture du rapport.
+	\end{itemize}
+
 \section*{Conclusion}
 \addcontentsline{toc}{section}{Conclusion}
 

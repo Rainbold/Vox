@@ -9,9 +9,11 @@
 \contentsline {subsection}{\numberline {2.1}\'Etude th\'eorique}{3}
 \contentsline {subsection}{\numberline {2.2}Impl\'ementation sur Matlab}{8}
 \contentsline {subsubsection}{\numberline {2.2.1}Signaux g\'en\'er\'es}{8}
-\contentsline {subsubsection}{\numberline {2.2.2}Signaux r\'eels}{8}
-\contentsline {section}{\numberline {3}Approche par m\'ethode de Capon}{8}
+\contentsline {subsubsection}{\numberline {2.2.2}Signaux r\'eels}{9}
+\contentsline {section}{\numberline {3}Approche par m\'ethode de Capon}{9}
 \contentsline {subsection}{\numberline {3.1}Impl\'ementation sur Matlab}{10}
 \contentsline {subsubsection}{\numberline {3.1.1}Signaux g\'en\'er\'es}{10}
 \contentsline {subsubsection}{\numberline {3.1.2}Signaux r\'eels}{10}
-\contentsline {section}{Conclusion}{11}
+\contentsline {section}{\numberline {4}Analyse temps-fr\'equence}{11}
+\contentsline {section}{\numberline {5}Bilan de l'organisation}{12}
+\contentsline {section}{Conclusion}{12}
