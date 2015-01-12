@@ -71,12 +71,12 @@ handles.ar_ordre = 22;
 handles.capon_pas = 100;
 
 % Spectrogramme
-handles.nb_colonne = 400;
-handles.nb_ligne = 200;
+handles.nb_colonne = 200;
+handles.nb_ligne = 80;
 handles.image = zeros(handles.nb_ligne, handles.nb_colonne);
 handles.position = 1;
 handles.fentre1 = 0; % en nb de points
-handles.recouvrement = 0.5;
+handles.recouvrement = 0.5
 
 % Update handles structure
 guidata(hObject, handles);
@@ -222,21 +222,28 @@ function spectrogramme(handles)
     %cla(handles.axes_spectrogramme);
     N=length(handles.signal_raw);
     if(~isempty(handles.signal_raw))
-        while(get(findobj('Tag', 'checkbox_activer'),'Value') == 1 && (handles.position) < N)
-            d = max([1 handles.position-handles.fenetre1]);
-            f = min([N handles.position+handles.fenetre1]);
-            signal = handles.signal_raw(d:f);
+        while(get(findobj('Tag', 'checkbox_activer'),'Value') == 1 && (handles.position+handles.signal_fech*handles.fenetre1*10^-3) < N)
+            debut = tic;
+            fprintf(1, 'update\n');
+            d = max[0 handles.position-fix(handles.fenetre/2)];
+            f = min[N handles.position+handles.fenetre1];
+            signal = handles.signal_raw(d,f);
             f1 = abs(fft(signal, 2*handles.nb_ligne));
             f2 = f1(1:handles.nb_ligne);
-            f3 = f2/max(f2);
+            f3 = fliplr(f2/max(f2));
             
-            handles.image(:,fix(handles.position/handles.fenetre1)+1) = flipud(f3);
+            handles.image(:,fix(handles.position/handles.fenetre1)+1) = f3;
             
-            imshow(handles.image), colormap('Jet');
+            imshow(handles.image), colormap('Hot');
             handles.position = handles.position + handles.fenetre1;
-            pause(0.001);
+            fin = toc(debut)*10^3;
+            if(fin < handles.fenetre1)
+                fprintf(1, 'wait\n');
+                pause((handles.fenetre1 - fin)*10^-3); % Necessite une version de matlab récente
+            end
+            fprintf(1, 'ok\n');
         end
-        %fprintf(1, 'sortie\n');
+        fprintf(1, 'sortie\n');
         set(handles.checkbox_activer, 'Value', 0);
         guidata(findobj('Tag', 'figure1'), handles);
     end
@@ -771,5 +778,4 @@ function button_reset_spectrogramme_Callback(hObject, eventdata, handles)
  axes(handles.axes_spectrogramme);
  cla(handles.axes_spectrogramme);
  handles.image = zeros(handles.nb_ligne, handles.nb_colonne);
- guidata(hObject, handles);
 end
